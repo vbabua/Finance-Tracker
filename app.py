@@ -1,5 +1,6 @@
 import streamlit as st
 from utils.file_handler import save_temporary_file, delete_temporary_file
+from utils.transaction_extractor import extract_transactions_from_pdf
 
 st.set_page_config(page_title="Finance Tracker", page_icon="💰", layout="wide")
 
@@ -30,7 +31,7 @@ def main():
 
         with st.spinner("Extracting transactions..."):
             if account_name == "A":
-                # Call the function to extract transactions for account A
+                extracted_transactions = extract_transactions_from_pdf(temporary_file_path, debug = False)
                 pass
             elif account_name == "B":
                 # Call the function to extract transactions for account B
