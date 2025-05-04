@@ -100,3 +100,38 @@ def extract_transactions_from_pdf(pdf_path, debug = False):
     df = df[["Date", "Year", "Month", "Details", "Amount", "Debit/Credit"]]
 
     return df
+
+def extract_transactions_from_csv(csv_path, debug = False):
+    """
+    Extracts transactions from a Revolut CSV statement.
+
+    Args:
+        csv_path (str): Path to the uploaded Revolut CSV statement.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing formatted transactions matching the expected format
+    """
+    # Read the CSV file
+    df = pd.read_csv(csv_path)
+    
+    # Create a new DataFrame with the required columns
+    transactions_df = pd.DataFrame()
+    
+    # Extract and transform data
+    transactions_df["Date"] = pd.to_datetime(df["Completed Date"]).dt.strftime('%Y-%m-%d')
+    transactions_df["Details"] = df["Description"]
+    transactions_df["Amount"] = df["Amount"].abs()  # Remove negative sign, we'll handle type separately
+    
+    # Determine transaction type (Credit or Debit)
+    transactions_df["Debit/Credit"] = df["Amount"].apply(
+        lambda x: "Credit" if x >= 0 else "Debit"
+    )
+    
+    # Add year and month columns
+    transactions_df["Year"] = pd.to_datetime(df["Completed Date"]).dt.year
+    transactions_df["Month"] = pd.to_datetime(df["Completed Date"]).dt.strftime("%B")
+    
+    # Reorder columns to match expected format
+    transactions_df = transactions_df[["Date", "Year", "Month", "Details", "Amount", "Debit/Credit"]]
+    
+    return transactions_df
